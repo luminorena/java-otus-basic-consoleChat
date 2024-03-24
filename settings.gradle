@@ -1,0 +1,4 @@
+rootProject.name = 'otus-console-chat'
+include 'client'
+include 'server'
+
