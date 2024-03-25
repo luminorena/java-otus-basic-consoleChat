@@ -40,5 +40,9 @@ public class Server {
             c.sendMessage(message);
         }
     }
+
+    public synchronized void unicastMessage(ClientHandler clientHandler, String message) {
+        clientHandler.sendMessage(message);
+    }
 }
 

@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ClientApplication {
+
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         try (
@@ -28,9 +30,14 @@ public class ClientApplication {
             while (true) {
                 String msg = scanner.nextLine();
                 out.writeUTF(msg);
+                if (msg.startsWith("/w")) {
+                    System.out.println("/w test");
+                    out.writeUTF(msg);
+                }
                 if (msg.equals("/exit")) {
                     break;
                 }
+
             }
         } catch (IOException e) {
             e.printStackTrace();

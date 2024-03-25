@@ -18,7 +18,10 @@ public class ClientHandler {
         usersCounter++;
         this.username = "user" + usersCounter;
     }
-
+/*
+Реализуйте возможность отправки личных сообщений: если клиент пишет «/w tom Hello»,
+ то сообщение Hello должно быть отправлено только клиенту с ником tom
+ */
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
@@ -34,6 +37,9 @@ public class ClientHandler {
                         if (msg.startsWith("/exit")) {
                             disconnect();
                             break;
+                        }
+                        if (msg.equals("/w " + username)){
+                            server.unicastMessage(this, msg);
                         }
                         continue;
                     }
