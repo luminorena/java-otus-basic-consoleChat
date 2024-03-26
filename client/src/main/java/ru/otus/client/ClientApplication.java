@@ -7,6 +7,8 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ClientApplication {
+
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         try (
@@ -31,6 +33,7 @@ public class ClientApplication {
                 if (msg.equals("/exit")) {
                     break;
                 }
+
             }
         } catch (IOException e) {
             e.printStackTrace();

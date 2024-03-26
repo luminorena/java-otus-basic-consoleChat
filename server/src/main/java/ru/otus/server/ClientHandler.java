@@ -11,12 +11,15 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String username;
-
     private static int usersCounter = 0;
 
-    private void generateUsername() {
+    public void generateUsername() {
         usersCounter++;
-        this.username = "user" + usersCounter;
+       this.username = "user" + usersCounter;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public ClientHandler(Server server, Socket socket) throws IOException {
@@ -34,6 +37,12 @@ public class ClientHandler {
                         if (msg.startsWith("/exit")) {
                             disconnect();
                             break;
+                        }
+                        if (msg.startsWith("/w ")){
+                            String[] str = msg.split(" ");
+                            String user = str[1];
+                            String message = str[2];
+                            server.unicastMessage(user, username + ": " + message);
                         }
                         continue;
                     }
@@ -79,4 +88,9 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+
+
+
+
+
 }
