@@ -5,10 +5,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Server {
     private int port;
     private List<ClientHandler> clients;
+    private List<ClientHandler> list;
 
     public Server(int port) {
         this.port = port;
@@ -38,11 +41,20 @@ public class Server {
     public synchronized void broadcastMessage(String message) {
         for (ClientHandler c : clients) {
             c.sendMessage(message);
+
         }
     }
 
-    public synchronized void unicastMessage(ClientHandler clientHandler, String message) {
-        clientHandler.sendMessage(message);
+    public synchronized void unicastMessage(String name, String message) {
+         list = clients.stream()
+                .filter(e -> e.getUsername()
+                .equals(name))
+                .collect(Collectors.toList());
+
+        IntStream.range(0, list.size())
+                .forEach(i -> list.get(i)
+                .sendMessage(message));
+
     }
 }
 

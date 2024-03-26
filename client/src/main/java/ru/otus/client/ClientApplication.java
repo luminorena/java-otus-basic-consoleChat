@@ -30,10 +30,6 @@ public class ClientApplication {
             while (true) {
                 String msg = scanner.nextLine();
                 out.writeUTF(msg);
-                if (msg.startsWith("/w")) {
-                    System.out.println("/w test");
-                    out.writeUTF(msg);
-                }
                 if (msg.equals("/exit")) {
                     break;
                 }

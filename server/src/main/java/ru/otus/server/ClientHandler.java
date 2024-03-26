@@ -11,17 +11,17 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String username;
-
     private static int usersCounter = 0;
 
-    private void generateUsername() {
+    public void generateUsername() {
         usersCounter++;
-        this.username = "user" + usersCounter;
+       this.username = "user" + usersCounter;
     }
-/*
-Реализуйте возможность отправки личных сообщений: если клиент пишет «/w tom Hello»,
- то сообщение Hello должно быть отправлено только клиенту с ником tom
- */
+
+    public String getUsername() {
+        return username;
+    }
+
     public ClientHandler(Server server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
@@ -38,8 +38,11 @@ public class ClientHandler {
                             disconnect();
                             break;
                         }
-                        if (msg.equals("/w " + username)){
-                            server.unicastMessage(this, msg);
+                        if (msg.startsWith("/w ")){
+                            String[] str = msg.split(" ");
+                            String user = str[1];
+                            String message = str[2];
+                            server.unicastMessage(user, username + ": " + message);
                         }
                         continue;
                     }
@@ -85,4 +88,9 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+
+
+
+
+
 }
