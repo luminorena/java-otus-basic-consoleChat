@@ -11,6 +11,11 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String nickname;
+    private String login;
+    private String password;
+    private PersonRole personRole;
+    private ClientHandler clientHandler;
+
 
     public String getNickname() {
         return nickname;
@@ -54,14 +59,14 @@ public class ClientHandler {
     private boolean tryToAuthenticate() throws IOException {
         while (true) {
             String msg = in.readUTF();
+            String[] tokens1 = msg.split(" ");
             if (msg.startsWith("/auth ")) {
-                String[] tokens = msg.split(" ");
-                if (tokens.length != 3) {
+                if (tokens1.length != 3) {
                     sendMessage("Некорректный формат запроса");
                     continue;
                 }
-                String login = tokens[1];
-                String password = tokens[2];
+                String login = tokens1[1];
+                String password = tokens1[2];
                 String nickname = server.getAuthenticationService().getNicknameByLoginAndPassword(login, password);
                 if (nickname == null) {
                     sendMessage("Неправильный логин/пароль");
@@ -74,8 +79,23 @@ public class ClientHandler {
                 this.nickname = nickname;
                 server.subscribe(this);
                 sendMessage(nickname + ", добро пожаловать в чат!");
-                return true;
-            } else if (msg.startsWith("/register ")) {
+
+                continue;
+
+            }
+
+            boolean role = server.getAuthenticationService().isAdminOnline(tokens1[1]);
+            if  (msg.startsWith("/kick ")) {
+                if (!role) {
+                    server.kickUser(tokens1[1]);
+                   // server.unsubscribe(this.clientHandler);
+                  //  server.getAuthenticationService().kickUserByNickname(tokens1[1]);
+
+                }
+                else sendMessage("Операция требует повышения прав ");
+            }
+
+            else if (msg.startsWith("/register ")) {
                 // /register login pass nickname
                 String[] tokens = msg.split(" ");
                 if (tokens.length != 4) {
@@ -93,7 +113,7 @@ public class ClientHandler {
                     sendMessage("Указанный никнейм уже занят");
                     continue;
                 }
-                if (!server.getAuthenticationService().register(login, password, nickname)) {
+                if (!server.getAuthenticationService().register(login, password, nickname, PersonRole.USER)) {
                     sendMessage("Не удалось пройти регистрацию");
                     continue;
                 }
@@ -103,9 +123,12 @@ public class ClientHandler {
                 return true;
             } else if (msg.equals("/exit")) {
                 return false;
-            } else {
+            }
+            else {
                 sendMessage("Вам необходимо авторизоваться");
             }
+
+
         }
     }
 
@@ -115,6 +138,10 @@ public class ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void kickUser() {
+        server.unsubscribe(this);
     }
 
     public void disconnect() {

@@ -8,21 +8,25 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         private String login;
         private String password;
         private String nickname;
+        private PersonRole personRole;
 
-        public User(String login, String password, String nickname) {
+        public User(String login, String password, String nickname, PersonRole personRole) {
             this.login = login;
             this.password = password;
             this.nickname = nickname;
+            this.personRole = personRole;
         }
     }
 
     private List<User> users;
+    private ClientHandler clientHandler;
 
     public InMemoryAuthenticationService() {
         this.users = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            this.users.add(new User("login" + i, "pass" + i, "nick" + i));
+            this.users.add(new User("login" + i, "pass" + i, "nick" + i, PersonRole.USER));
         }
+        this.users.add(new User("admin", "admin", "admin", PersonRole.ADMIN));
     }
 
     @Override
@@ -36,14 +40,14 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public boolean register(String login, String password, String nickname) {
+    public boolean register(String login, String password, String nickname, PersonRole personRole) {
         if (isLoginAlreadyExist(login)) {
             return false;
         }
         if (isNicknameAlreadyExist(nickname)) {
             return false;
         }
-        users.add(new User(login, password, nickname));
+        users.add(new User(login, password, nickname, personRole));
         return true;
     }
 
@@ -65,6 +69,27 @@ public class InMemoryAuthenticationService implements AuthenticationService {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean isAdminOnline(String nickname) {
+        for (User u: users){
+            if (u.nickname.equals(nickname)) {
+                if (u.personRole.equals(PersonRole.ADMIN)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void kickUserByNickname(String nickname) {
+        for (User u: users){
+            if (u.nickname.equals(nickname)) {
+                this.clientHandler.kickUser();
+            }
+        }
     }
 }
 

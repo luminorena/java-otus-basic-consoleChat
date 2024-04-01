@@ -11,6 +11,7 @@ public class Server {
     private int port;
     private List<ClientHandler> clients;
     private AuthenticationService authenticationService;
+    private ClientHandler clientHandler;
 
     public AuthenticationService getAuthenticationService() {
         return authenticationService;
@@ -45,6 +46,7 @@ public class Server {
     }
 
     public synchronized void unsubscribe(ClientHandler clientHandler) {
+        this.clientHandler = clientHandler;
         clients.remove(clientHandler);
         broadcastMessage("Из чата вышел " + clientHandler.getNickname());
     }
@@ -55,6 +57,19 @@ public class Server {
         }
     }
 
+    public synchronized void kickUser(String nickname){
+        for (ClientHandler c : clients) {
+            if (c.getNickname().equals(nickname)) {
+              //  getAuthenticationService().kickUserByNickname(nickname);
+           //   c.kickUser();
+              unsubscribe(c);
+              //  kickUserByNickname(nickname);
+            }
+        }
+
+
+    }
+
     public synchronized boolean isNicknameBusy(String nickname) {
         for (ClientHandler c : clients) {
             if (c.getNickname().equals(nickname)) {
@@ -63,4 +78,9 @@ public class Server {
         }
         return false;
     }
+
+
+
+
+
 }
