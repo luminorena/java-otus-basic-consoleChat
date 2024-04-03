@@ -12,6 +12,7 @@ public class Server {
     private List<ClientHandler> clients;
     private AuthenticationService authenticationService;
     private ClientHandler clientHandler;
+    private Socket socket;
 
     public AuthenticationService getAuthenticationService() {
         return authenticationService;
@@ -29,7 +30,7 @@ public class Server {
             System.out.printf("Сервер запущен на порту: %d, ожидаем подключения клиентов\n", port);
             while (true) {
                 try {
-                    Socket socket = serverSocket.accept();
+                    socket = serverSocket.accept();
                     new ClientHandler(this, socket);
                 } catch (Exception e) {
                     System.out.println("Возникла ошибка при обработке подключившегося клиента");
@@ -57,16 +58,12 @@ public class Server {
         }
     }
 
-    public synchronized void kickUser(String nickname){
+    public synchronized void kickUser(String nickname) throws IOException {
         for (ClientHandler c : clients) {
             if (c.getNickname().equals(nickname)) {
-              //  getAuthenticationService().kickUserByNickname(nickname);
-           //   c.kickUser();
-              unsubscribe(c);
-              //  kickUserByNickname(nickname);
+                socket.close();
             }
         }
-
 
     }
 
@@ -78,9 +75,4 @@ public class Server {
         }
         return false;
     }
-
-
-
-
-
 }

@@ -11,10 +11,7 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private String nickname;
-    private String login;
-    private String password;
-    private PersonRole personRole;
-    private ClientHandler clientHandler;
+
 
 
     public String getNickname() {
@@ -32,6 +29,7 @@ public class ClientHandler {
                 if (tryToAuthenticate()) {
                     communicate();
                 }
+
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -43,13 +41,22 @@ public class ClientHandler {
     private void communicate() throws IOException {
         while (true) {
             String msg = in.readUTF();
+            String[] tokens1 = msg.split(" ");
             if (msg.startsWith("/")) {
                 if (msg.startsWith("/exit")) {
                     break;
                 }
-//                if (msg.startsWith("/w ")) {
-//                    String[] tokens = msg.split(" ", 3);
-//                }
+                if (msg.startsWith("/kick ")) {
+                    boolean role = server.getAuthenticationService().isAdminOnline(tokens1[1]);
+                    if (!role) {
+                        sendMessage("Юзер " + tokens1[1] + " забанен!");
+                        server.kickUser(tokens1[1]);
+
+                    } else {
+                        sendMessage("Операция требует повышения прав ");
+                    }
+                }
+
                 continue;
             }
             server.broadcastMessage(nickname + ": " + msg);
@@ -60,6 +67,7 @@ public class ClientHandler {
         while (true) {
             String msg = in.readUTF();
             String[] tokens1 = msg.split(" ");
+
             if (msg.startsWith("/auth ")) {
                 if (tokens1.length != 3) {
                     sendMessage("Некорректный формат запроса");
@@ -79,24 +87,8 @@ public class ClientHandler {
                 this.nickname = nickname;
                 server.subscribe(this);
                 sendMessage(nickname + ", добро пожаловать в чат!");
-
-                continue;
-
-            }
-
-            boolean role = server.getAuthenticationService().isAdminOnline(tokens1[1]);
-            if  (msg.startsWith("/kick ")) {
-                if (!role) {
-                    server.kickUser(tokens1[1]);
-                   // server.unsubscribe(this.clientHandler);
-                  //  server.getAuthenticationService().kickUserByNickname(tokens1[1]);
-
-                }
-                else sendMessage("Операция требует повышения прав ");
-            }
-
-            else if (msg.startsWith("/register ")) {
-                // /register login pass nickname
+                return true;
+            } else if (msg.startsWith("/register ")) {
                 String[] tokens = msg.split(" ");
                 if (tokens.length != 4) {
                     sendMessage("Некорректный формат запроса");
@@ -123,8 +115,7 @@ public class ClientHandler {
                 return true;
             } else if (msg.equals("/exit")) {
                 return false;
-            }
-            else {
+            } else {
                 sendMessage("Вам необходимо авторизоваться");
             }
 
@@ -140,9 +131,6 @@ public class ClientHandler {
         }
     }
 
-    public void kickUser() {
-        server.unsubscribe(this);
-    }
 
     public void disconnect() {
         server.unsubscribe(this);

@@ -19,7 +19,6 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     private List<User> users;
-    private ClientHandler clientHandler;
 
     public InMemoryAuthenticationService() {
         this.users = new ArrayList<>();
@@ -73,7 +72,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
 
     @Override
     public boolean isAdminOnline(String nickname) {
-        for (User u: users){
+        for (User u : users) {
             if (u.nickname.equals(nickname)) {
                 if (u.personRole.equals(PersonRole.ADMIN)) {
                     return true;
@@ -81,15 +80,6 @@ public class InMemoryAuthenticationService implements AuthenticationService {
             }
         }
         return false;
-    }
-
-    @Override
-    public void kickUserByNickname(String nickname) {
-        for (User u: users){
-            if (u.nickname.equals(nickname)) {
-                this.clientHandler.kickUser();
-            }
-        }
     }
 }
 

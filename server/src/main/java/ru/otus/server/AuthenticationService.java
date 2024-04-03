@@ -6,5 +6,4 @@ public interface AuthenticationService {
     boolean isLoginAlreadyExist(String login);
     boolean isNicknameAlreadyExist(String nickname);
     boolean isAdminOnline(String nickname);
-    void kickUserByNickname(String nickname);
 }
