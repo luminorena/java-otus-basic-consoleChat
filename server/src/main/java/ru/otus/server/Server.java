@@ -1,9 +1,11 @@
 package ru.otus.server;
 
+import ru.otus.data.DataConnection;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +25,10 @@ public class Server {
         this.clients = new ArrayList<>();
     }
 
+
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            this.authenticationService = new InMemoryAuthenticationService();
+            this.authenticationService = new DataConnection();
             System.out.println("Сервис аутентификации запущен: " + authenticationService.getClass().getSimpleName());
             System.out.printf("Сервер запущен на порту: %d, ожидаем подключения клиентов\n", port);
             while (true) {
@@ -36,7 +39,7 @@ public class Server {
                     System.out.println("Возникла ошибка при обработке подключившегося клиента");
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }

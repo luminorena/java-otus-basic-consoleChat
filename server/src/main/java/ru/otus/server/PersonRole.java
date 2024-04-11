@@ -6,11 +6,9 @@ public enum PersonRole {
 
     private String user;
 
-
     PersonRole(String user) {
         this.user = user;
     }
-
 
     public String getUser() {
         return this.user;

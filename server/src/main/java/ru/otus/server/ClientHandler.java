@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.sql.SQLException;
 
 public class ClientHandler {
     private Server server;
@@ -30,7 +31,7 @@ public class ClientHandler {
                     communicate();
                 }
 
-            } catch (IOException e) {
+            } catch (IOException | SQLException e) {
                 e.printStackTrace();
             } finally {
                 disconnect();
@@ -38,7 +39,7 @@ public class ClientHandler {
         }).start();
     }
 
-    private void communicate() throws IOException {
+    private void communicate() throws IOException, SQLException {
         while (true) {
             String msg = in.readUTF();
             String[] tokens1 = msg.split(" ");
@@ -63,7 +64,7 @@ public class ClientHandler {
         }
     }
 
-    private boolean tryToAuthenticate() throws IOException {
+    private boolean tryToAuthenticate() throws IOException, SQLException {
         while (true) {
             String msg = in.readUTF();
             String[] tokens1 = msg.split(" ");
@@ -105,7 +106,7 @@ public class ClientHandler {
                     sendMessage("Указанный никнейм уже занят");
                     continue;
                 }
-                if (!server.getAuthenticationService().register(login, password, nickname, PersonRole.USER)) {
+                if (!server.getAuthenticationService().register2(login, password, nickname, PersonRole.USER)) {
                     sendMessage("Не удалось пройти регистрацию");
                     continue;
                 }

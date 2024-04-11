@@ -1,5 +1,6 @@
 package ru.otus.server;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public boolean register(String login, String password, String nickname, PersonRole personRole) {
+    public boolean register2(String login, String password, String nickname, PersonRole personRole) {
         if (isLoginAlreadyExist(login)) {
             return false;
         }
@@ -79,6 +80,11 @@ public class InMemoryAuthenticationService implements AuthenticationService {
                 }
             }
         }
+        return false;
+    }
+
+    @Override
+    public boolean register(String login, String password, String nickname, int role_id, int id) throws SQLException {
         return false;
     }
 }
