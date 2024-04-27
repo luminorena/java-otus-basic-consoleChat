@@ -11,13 +11,13 @@ import java.util.*;
 public class DataConnection implements AuthenticationService {
     private final Connection connection;
 
-    private static final String GET_USER_CREDENTIALS = "select login, password, nickname from users";
+    private static final String GET_USER_CREDENTIALS = "select login, password, nickname from users where login = ? and password = ?";
     private static final String GET_LOGIN = "select login from users";
     private static final String GET_NICKNAME = "select nickname from users";
     private static final String GET_NICKNAME_AND_ROLE = "select role_name, nickname\n" +
             "from user_to_role ur\n" +
             "left join roles r ON r.id=ur.role_id\n" +
-            "join users u on u.id = ur.user_id;";
+            "join users u on u.id = ur.user_id where nickname = ?";
     private static final String INSERT_USER_DATA = "DO $$\n" +
             "DECLARE\n" +
             "  param int;\n" +
@@ -61,39 +61,25 @@ public class DataConnection implements AuthenticationService {
 
     @Override
     public String getNicknameByLoginAndPassword(String loginValue, String passwordValue) throws SQLException {
-        Map<User, String> credentials = new HashMap<>();
-        List<User> users = new ArrayList<>();
-        List<String> result = new ArrayList<>();
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
+        User user = null;
         try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(GET_USER_CREDENTIALS);
-
+            preparedStatement = connection.prepareStatement(GET_USER_CREDENTIALS);
+            resultSet = preparedStatement.executeQuery(GET_USER_CREDENTIALS);
             while (resultSet.next()) {
                 String loginParam = resultSet.getString("login");
                 String passwordParam = resultSet.getString("password");
                 String nicknameParam = resultSet.getString("nickname");
-                User user = new User(loginParam, passwordParam);
-                users.add(user);
-                credentials.put(user, nicknameParam);
-            }
-            Iterator<Map.Entry<User, String>> iterator = credentials.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<User, String> entry = iterator.next();
-                User key = entry.getKey();
-                if (key.getLogin().equals(loginValue) && key.getPassword().equals(passwordValue)) {
-                    result.add(entry.getValue());
-                    break;
-                }
-            }
+                preparedStatement.setString(1, loginValue);
+                user = new User(loginParam, passwordParam);}
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            close(null, statement, resultSet);
+            close(null, preparedStatement, resultSet);
         }
 
-        return result.toString();
+        return user.toString();
     }
 
     @Override
@@ -173,14 +159,15 @@ public class DataConnection implements AuthenticationService {
 
     @Override
     public boolean isAdminOnline(String nickname) throws SQLException {
-        Statement statement = null;
+        PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         String nickResult = null;
         String role = null;
         try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(GET_NICKNAME_AND_ROLE);
+            preparedStatement = connection.prepareStatement(GET_NICKNAME_AND_ROLE);
+            resultSet = preparedStatement.executeQuery(GET_NICKNAME_AND_ROLE);
             while (resultSet.next()) {
+                preparedStatement.setString(1, nickname);
                 nickResult = resultSet.getString("nickname");
                 role = resultSet.getString("role_name");
             }
@@ -191,7 +178,7 @@ public class DataConnection implements AuthenticationService {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            close(null, statement, resultSet);
+            close(null, preparedStatement, resultSet);
         }
 
         return false;
