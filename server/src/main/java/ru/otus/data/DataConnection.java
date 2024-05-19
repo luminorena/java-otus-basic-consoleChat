@@ -67,11 +67,13 @@ public class DataConnection implements AuthenticationService {
         try {
             preparedStatement = connection.prepareStatement(GET_USER_CREDENTIALS);
             resultSet = preparedStatement.executeQuery(GET_USER_CREDENTIALS);
+            preparedStatement.setString(1, loginValue);
+            preparedStatement.setString(2, passwordValue);
+            resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String loginParam = resultSet.getString("login");
                 String passwordParam = resultSet.getString("password");
                 String nicknameParam = resultSet.getString("nickname");
-                preparedStatement.setString(1, loginValue);
                 user = new User(loginParam, passwordParam);}
         } catch (SQLException e) {
             e.printStackTrace();
@@ -166,8 +168,8 @@ public class DataConnection implements AuthenticationService {
         try {
             preparedStatement = connection.prepareStatement(GET_NICKNAME_AND_ROLE);
             resultSet = preparedStatement.executeQuery(GET_NICKNAME_AND_ROLE);
+            preparedStatement.setString(1, nickname);
             while (resultSet.next()) {
-                preparedStatement.setString(1, nickname);
                 nickResult = resultSet.getString("nickname");
                 role = resultSet.getString("role_name");
             }
