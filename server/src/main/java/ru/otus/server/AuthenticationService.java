@@ -8,5 +8,5 @@ public interface AuthenticationService {
     boolean isLoginAlreadyExist(String login) throws SQLException;
     boolean isNicknameAlreadyExist(String nickname) throws SQLException;
     boolean isAdminOnline(String nickname) throws SQLException;
-    boolean register(String login, String password, String nickname, int role_id, int id) throws SQLException;
+    int register(String login, String password, String nickname, int role) throws SQLException;
 }

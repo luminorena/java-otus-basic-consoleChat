@@ -11,30 +11,16 @@ import java.util.*;
 public class DataConnection implements AuthenticationService {
     private final Connection connection;
 
-    private static final String GET_USER_CREDENTIALS = "select login, password, nickname from users where login = ? and password = ?";
-    private static final String GET_LOGIN = "select login from users";
-    private static final String GET_NICKNAME = "select nickname from users";
+    private static final String GET_USER_CREDENTIALS = "select login, password, nickname from public.users where login = ? and password = ?";
+    private static final String GET_LOGIN = "select login from public.users";
+    private static final String GET_NICKNAME = "select nickname from public.users";
     private static final String GET_NICKNAME_AND_ROLE = "select role_name, nickname\n" +
             "from user_to_role ur\n" +
             "left join roles r ON r.id=ur.role_id\n" +
             "join users u on u.id = ur.user_id where nickname = ?";
-    private static final String INSERT_USER_DATA = "DO $$\n" +
-            "DECLARE\n" +
-            "  param int;\n" +
-            "BEGIN\n" +
-            "  insert into users (id, login, password, nickname) values(?, ?, ?, ?);\n" +
-            "  SELECT MAX(user_id) INTO param FROM user_to_role;\n" +
-            "  INSERT INTO user_to_role (user_id, role_id) VALUES (param+1, ?);\n" +
-            "END $$";
+    private static final String INSERT_USER_DATA = "insert into public.users (login, password, nickname) values(?, ?, ?);";
+    private static final String ADD_USER_ROLE = "insert into user_to_role (user_id, role_id) VALUES (?, ?)";
 
-    public static void main(String[] args) throws SQLException, IOException {
-        DataConnection dataConnection = new DataConnection();
-        System.out.println(dataConnection.isAdminOnline("admin"));
-        System.out.println(dataConnection.isNicknameAlreadyExist("admin1"));
-        System.out.println(dataConnection.isLoginAlreadyExist("admin99@mail.ru"));
-        System.out.println(dataConnection.getNicknameByLoginAndPassword("login1@mail.ru", "pass1"));
-        dataConnection.register("login6@mail.ru", "pass6", "login6", 2, 8);
-    }
 
     public DataConnection() throws SQLException, IOException {
         Properties props = new Properties();
@@ -66,22 +52,22 @@ public class DataConnection implements AuthenticationService {
         User user = null;
         try {
             preparedStatement = connection.prepareStatement(GET_USER_CREDENTIALS);
-            resultSet = preparedStatement.executeQuery(GET_USER_CREDENTIALS);
+        //    resultSet = preparedStatement.executeQuery();
             preparedStatement.setString(1, loginValue);
             preparedStatement.setString(2, passwordValue);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 String loginParam = resultSet.getString("login");
                 String passwordParam = resultSet.getString("password");
-                String nicknameParam = resultSet.getString("nickname");
-                user = new User(loginParam, passwordParam);}
+                return resultSet.getString("nickname");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             close(null, preparedStatement, resultSet);
         }
 
-        return user.toString();
+        return null;
     }
 
     @Override
@@ -90,27 +76,51 @@ public class DataConnection implements AuthenticationService {
     }
 
     @Override
-    public boolean register(String login, String password, String nickname, int role_id, int id) throws SQLException {
-        if (isLoginAlreadyExist(login)) {
-            return false;
-        }
-        if (isNicknameAlreadyExist(nickname)) {
-            return false;
-        }
+    public int register(String login, String password, String nickname, int role) throws SQLException {
+        int userId = Integer.parseInt(getUserId(login, password, nickname));
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
         try {
-                preparedStatement = connection.prepareStatement(INSERT_USER_DATA);
-                preparedStatement.setInt(1, id);
-                preparedStatement.setString(2, login);
-                preparedStatement.setString(3, password);
-                preparedStatement.setString(4, nickname);
-                preparedStatement.setInt(5, role_id);
+                preparedStatement = connection.prepareStatement(ADD_USER_ROLE);
+                preparedStatement.setInt(1, userId);
+                preparedStatement.setInt(2, role);
                 preparedStatement.executeUpdate();
+            while (resultSet.next()) {
+                return resultSet.getInt("role_id");
+            }
+
         } finally {
-            close(connection, preparedStatement,null);
+            close(connection, preparedStatement,resultSet);
         }
-        return true;
+        return 0;
     }
+
+    public String getUserId(String login, String password, String nickname) throws SQLException {
+            if (isLoginAlreadyExist(login)) {
+                return null;
+            }
+            if (isNicknameAlreadyExist(nickname)) {
+                return null;
+            }
+            PreparedStatement preparedStatement = null;
+            ResultSet resultSet = null;
+            try {
+                preparedStatement = connection.prepareStatement(INSERT_USER_DATA);
+                preparedStatement.setString(1, login);
+                preparedStatement.setString(2, password);
+                preparedStatement.setString(3, nickname);
+                preparedStatement.executeUpdate();
+                while (resultSet.next()) {
+                    System.out.println(resultSet.getInt("id"));
+                    return String.valueOf(resultSet.getInt("id"));
+                }
+
+            } finally {
+                close(connection, preparedStatement,resultSet);
+            }
+         return null;
+        }
+
 
     @Override
     public boolean isLoginAlreadyExist(String login) throws SQLException {

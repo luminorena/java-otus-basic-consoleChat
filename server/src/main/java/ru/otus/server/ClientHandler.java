@@ -106,7 +106,7 @@ public class ClientHandler {
                     sendMessage("Указанный никнейм уже занят");
                     continue;
                 }
-                if (!server.getAuthenticationService().register2(login, password, nickname, PersonRole.USER)) {
+                if (server.getAuthenticationService().register(login, password, nickname, 2) != 0) {
                     sendMessage("Не удалось пройти регистрацию");
                     continue;
                 }

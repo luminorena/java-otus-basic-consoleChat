@@ -84,8 +84,8 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public boolean register(String login, String password, String nickname, int role_id, int id) throws SQLException {
-        return false;
+    public int register(String login, String password, String nickname, int role) throws SQLException {
+        return 0;
     }
 }
 
