@@ -18,19 +18,19 @@ public class ClientApplication {
             new Thread(() -> {
                 try {
                     while (true) {
-                        String inMessage = in.readUTF();
-                        System.out.println(inMessage);
+                            String inMessage = in.readUTF();
+                            System.out.println(inMessage);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }).start();
             while (true) {
-                String msg = scanner.nextLine();
-                out.writeUTF(msg);
-                if (msg.equals("/exit")) {
-                    break;
-                }
+                    String msg = scanner.nextLine();
+                    out.writeUTF(msg);
+                    if (msg.equals("/exit")) {
+                        break;
+                    }
             }
         } catch (IOException e) {
             e.printStackTrace();
