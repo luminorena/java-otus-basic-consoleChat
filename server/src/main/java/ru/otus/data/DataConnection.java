@@ -49,16 +49,12 @@ public class DataConnection implements AuthenticationService {
     public String getNicknameByLoginAndPassword(String loginValue, String passwordValue) throws SQLException {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        User user = null;
         try {
             preparedStatement = connection.prepareStatement(GET_USER_CREDENTIALS);
-        //    resultSet = preparedStatement.executeQuery();
             preparedStatement.setString(1, loginValue);
             preparedStatement.setString(2, passwordValue);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                String loginParam = resultSet.getString("login");
-                String passwordParam = resultSet.getString("password");
                 return resultSet.getString("nickname");
             }
         } catch (SQLException e) {
@@ -68,11 +64,6 @@ public class DataConnection implements AuthenticationService {
         }
 
         return null;
-    }
-
-    @Override
-    public boolean register2(String login, String password, String nickname, PersonRole personRole) throws SQLException {
-        return false;
     }
 
     @Override
@@ -111,12 +102,15 @@ public class DataConnection implements AuthenticationService {
                 preparedStatement.setString(3, nickname);
                 preparedStatement.executeUpdate();
                 while (resultSet.next()) {
-                    System.out.println(resultSet.getInt("id"));
                     return String.valueOf(resultSet.getInt("id"));
                 }
 
-            } finally {
-                close(connection, preparedStatement,resultSet);
+            }  catch (NullPointerException e) {
+                e.printStackTrace();
+            }
+
+            finally {
+                close(connection, preparedStatement,null);
             }
          return null;
         }

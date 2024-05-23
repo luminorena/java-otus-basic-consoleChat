@@ -39,17 +39,6 @@ public class InMemoryAuthenticationService implements AuthenticationService {
         return null;
     }
 
-    @Override
-    public boolean register2(String login, String password, String nickname, PersonRole personRole) {
-        if (isLoginAlreadyExist(login)) {
-            return false;
-        }
-        if (isNicknameAlreadyExist(nickname)) {
-            return false;
-        }
-        users.add(new User(login, password, nickname, personRole));
-        return true;
-    }
 
     @Override
     public boolean isLoginAlreadyExist(String login) {
@@ -84,7 +73,7 @@ public class InMemoryAuthenticationService implements AuthenticationService {
     }
 
     @Override
-    public int register(String login, String password, String nickname, int role) throws SQLException {
+    public int register(String login, String password, String nickname, int role) {
         return 0;
     }
 }
